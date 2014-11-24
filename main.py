@@ -5,6 +5,8 @@ from Cparser import Cparser
 
 if __name__ == '__main__':
 
+    print  "boo"
+
     filename = ""
 
     try:
