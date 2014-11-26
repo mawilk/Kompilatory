@@ -3,9 +3,20 @@ class Node(object):
 
     # def __str__(self):
     #     return self.printTree()
+    #
+    # def __str__(self):
+    #     return self.__dict__.iteritems()
 
-    def __str__(self):
-        return self.__class__.__name__
+    def prosiaczek(self):
+        print self.__class__.__name__
+        for key,value in self.__dict__.iteritems():
+            if isinstance(value,list):
+                for n in value:
+                    n.prosiaczek()
+            elif isinstance(value,str):
+                print value
+            else:
+                value.prosiaczek()
 
 
 
@@ -19,8 +30,8 @@ class BinExpr(Node):
 
 class Const(Node):
     
-    def __init__(self):
-        self.const = self.__class__.__name__
+    def __init__(self,value):
+        self.value = value
 
 
 class Integer(Const):

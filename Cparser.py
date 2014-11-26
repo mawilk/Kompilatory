@@ -148,12 +148,12 @@ class Cparser(object):
         """const : INTEGER
                  | FLOAT
                  | STRING"""
-        if p[1]=="INTEGER":
-            p[0] = Integer()
-        elif p[1]=="FLOAT":
-            p[0] = Float()
+        if isinstance(p[1],int):
+            p[0] = Integer(p[1])
+        elif isinstance(p[1],float):
+            p[0] = Float(p[1])
         else:
-            p[0] = String()
+            p[0] = String(p[1])
     
     def p_expression(self, p):
         """expression : const

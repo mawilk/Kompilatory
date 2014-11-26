@@ -18,5 +18,5 @@ if __name__ == '__main__':
     Cparser = Cparser()
     parser = yacc.yacc(module=Cparser)
     text = file.read()
-    print (parser.parse(text, lexer=Cparser.scanner))
+    parser.parse(text, lexer=Cparser.scanner).printTree()
 
