@@ -19,7 +19,9 @@ class Scanner(object):
       self.lexer.input(text)
 
   def token(self):
-      return self.lexer.token()
+      tok = self.lexer.token()
+      # print tok
+      return tok
 
 
 
