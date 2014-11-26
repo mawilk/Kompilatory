@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-from scanner import Scanner, reserved
+from scanner import Scanner
 from AST import *
 
-
+operators = ["AND", "EQ", "GE", "ID", "LE", "NEQ", "OR", "SHL", "SHR", "+", "-","*","/","%","|","^"]
 
 class Cparser(object):
 
@@ -67,14 +67,14 @@ class Cparser(object):
 
     def p_init(self, p):
         """init : ID '=' expression """
-        p[0] = [BinExpr(p[1],'=',p[3])]
+        p[0] = [BinExpr('=',p[1],p[3])]
 
     
     def p_instructions(self, p):
         """instructions : instructions instruction
                         | instruction """
         if len(p)==2:
-            p[0] = p[1]
+            p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[2]]
     
@@ -102,14 +102,14 @@ class Cparser(object):
     
     def p_assignment(self, p):
         """assignment : ID '=' expression ';' """
-        p[0] = BinExpr(p[1],'=',p[3])
+        p[0] = BinExpr('=',p[1],p[3])
     
     def p_choice_instr(self, p):
         """choice_instr : IF '(' condition ')' instruction  %prec IFX
                         | IF '(' condition ')' instruction ELSE instruction
                         | IF '(' error ')' instruction  %prec IFX
                         | IF '(' error ')' instruction ELSE instruction """
-        if reserved.contains(p[6]):
+        if p[6]=='else':
             p[0] = IfElse(p[3],p[5],p[7])
         else:
             p[0] = If(p[3],p[5])         
@@ -138,7 +138,7 @@ class Cparser(object):
     
     def p_compound_instr(self, p):
         """compound_instr : '{' declarations instructions '}' """
-        p[0] = CompoundInstruction(p[2],p[3])
+        p[0] = CompoundInstructions(p[2],p[3])
     
     def p_condition(self, p):
         """condition : expression"""
@@ -180,42 +180,65 @@ class Cparser(object):
                       | '(' error ')'
                       | ID '(' expr_list_or_empty ')'
                       | ID '(' error ')' """
-        if len(p)==2 and reserved.contains(p[1]):
-            p[0] = 
-    
+        if len(p) == 4 and p[1] == '(':
+            p[0] = p[2]
+        elif len(p) == 5 and  p[2] == '(':
+            p[0] = Funcall(p[1],p[3])
+        elif len(p) == 4:
+            BinExpr(p[2],p[1],p[3])
+        elif len(p) == 2 and isinstance(p[1],Const):
+            p[0]=p[1]
+        else:
+            p[0] = Variable(p[1])
+
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
                               | """
-        print "expr_list_or_empty"
+        if len(p) == 1:
+            p[0]=Expressions([])
+        else:
+            p[0]=Expressions(p[1])
         
     
     def p_expr_list(self, p):
         """expr_list : expr_list ',' expression
                      | expression """
-        print "expr_list"
-    
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0]= p[1] + [p[3]]
+
     def p_fundefs(self, p):
         """fundefs : fundef fundefs
                    |  """
-        print "fundefs"
+        if len(p) == 1:
+            p[0] = Fundefs([])
+        else:
+            p[0] = Fundefs(p[1])
                    
     def p_fundef(self, p):
         """fundef : TYPE ID '(' args_list_or_empty ')' compound_instr """
-        print "fundef"
+        p[0] = Fundef(p[2],p[1],p[4],p[6])
         
     def p_args_list_or_empty(self, p):
         """args_list_or_empty : args_list
                               | """
-        print "args_list_or_empty"
+        if len(p) == 1:
+            p[0] = Arguments([])
+        else:
+            p[0] = p[1]
     
     def p_args_list(self, p):
         """args_list : args_list ',' arg 
                      | arg """
-        print "args_list"
+        if len(p) == 2:
+            p[0]= Arguments([p[1]])
+        else:
+            p[0]= Arguments(p[1].arguments+[p[3]])
     
     def p_arg(self, p):
         """arg : TYPE ID """
-        print "arg"
+        p[0] = Argument(p[1],p[2])
 
     
 

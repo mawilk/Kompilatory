@@ -1,8 +1,12 @@
 
 class Node(object):
 
+    # def __str__(self):
+    #     return self.printTree()
+
     def __str__(self):
-        return self.printTree()
+        return self.__class__.__name__
+
 
 
 class BinExpr(Node):
@@ -86,10 +90,27 @@ class While(Node):
         
 class Fundef(Node):
 
-    def __init__(self,name,ret,args):
+    def __init__(self,name,ret,args,instructions):
         self.name = name
         self.ret = ret
         self.args = args
+        self.instructions = instructions
+
+class Arguments(Node):
+
+    def __init__(self, arguments):
+        self.arguments = arguments
+
+class Argument(Node):
+
+    def __init__(self,type,id):
+        self.id = id
+        self.type = type
+
+class Fundefs(Node):
+
+    def __init__(self, fundefs):
+        self.fundefs = fundefs
         
 class Declaration(Node):
     
@@ -119,4 +140,8 @@ class CompoundInstructions(Node):
     def __init__(self,declarations,instructions):
         self.declarations = declarations
         self.instructions = instructions
-        
+
+class Expressions(Node):
+
+    def __init__(self,expressions):
+        self.expressions = expressions
