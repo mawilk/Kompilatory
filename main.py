@@ -14,9 +14,8 @@ if __name__ == '__main__':
         print("Cannot open {0} file".format(filename))
         sys.exit(0)
 
-
     Cparser = Cparser()
     parser = yacc.yacc(module=Cparser)
     text = file.read()
-    parser.parse(text, lexer=Cparser.scanner).printTree()
-
+    tree = parser.parse(text, lexer=Cparser.scanner)
+    print(tree)
