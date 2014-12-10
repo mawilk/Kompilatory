@@ -21,7 +21,6 @@ for op in comp_op:
     ttype[op]['float']['float'] = 'int'
     ttype[op]['string']['string'] = 'int'
 
-
 ttype['=']['int']['int'] = 'int'
 ttype['=']['float']['float'] = 'float'
 ttype['=']['string']['string'] = 'string'
@@ -30,4 +29,3 @@ ttype['=']['float']['int'] = 'float'
 
 ttype['+']['string']['string'] = 'string'
 ttype['*']['string']['int'] = 'string'
-

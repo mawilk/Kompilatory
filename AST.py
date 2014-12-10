@@ -1,3 +1,5 @@
+from Types import ttype
+
 def indenting(indent):
     if indent == 0:
         return ''
@@ -18,6 +20,7 @@ class BinExpr(Node):
         self.op = op
         self.left = left
         self.right = right
+        self.type = ttype[op][left.type][right.type]
 
     def printTree(self, indent):
         result = indenting(indent) + self.op + "\n"
@@ -35,15 +38,22 @@ class Const(Node):
 
 
 class Integer(Const):
-    pass
+    def __init__(self,value):
+        Const.__init__(self,value)
+        self.type = 'int'
 
 
 class Float(Const):
-    pass
+    def __init__(self,value):
+        Const.__init__(self,value)
+        self.type = 'float'
+
 
 
 class String(Const):
-    pass
+    def __init__(self,value):
+        Const.__init__(self,value)
+        self.type = 'string'
 
 
 class Variable(Node):
@@ -139,33 +149,33 @@ class While(Node):
 
 
 class Fundef(Node):
-    def __init__(self, name, ret, arguments, instructions):
+    def __init__(self, name, type, arguments, instructions):
         self.name = name
-        self.ret = ret
+        self.type = type
         self.arguments = arguments
         self.instructions = instructions
 
     def printTree(self, indent):
         result = indenting(indent) + 'FUNDEF\n'
         result += indenting(indent + 1) + self.name + '\n'
-        result += indenting(indent + 1) + 'RET ' + self.ret + '\n'
+        result += indenting(indent + 1) + 'RET ' + self.type + '\n'
         result += '\n'.join(x.printTree(indent + 1) for x in self.arguments) + '\n'
         result += self.instructions.printTree(indent + 1)
         return result
 
 
 class Argument(Node):
-    def __init__(self, arg_type, name):
+    def __init__(self, type, name):
         self.name = name
-        self.arg_type = arg_type
+        self.type = type
 
     def printTree(self, indent):
         return indenting(indent) + "ARG " + self.name
 
 
 class Declaration(Node):
-    def __init__(self, decl_type, inits):
-        self.decl_type = decl_type
+    def __init__(self, type, inits):
+        self.type = type
         self.inits = inits
 
     def printTree(self, indent):
