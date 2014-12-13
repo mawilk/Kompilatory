@@ -1,6 +1,7 @@
 import sys
 import ply.yacc as yacc
 from Cparser import Cparser
+from TypeChecker import TypeChecker
 
 
 if __name__ == '__main__':
@@ -18,4 +19,6 @@ if __name__ == '__main__':
     parser = yacc.yacc(module=Cparser)
     text = file.read()
     tree = parser.parse(text, lexer=Cparser.scanner)
-    print(tree)
+    # print(tree)
+    typeChecker = TypeChecker()
+    tree.accept(typeChecker)

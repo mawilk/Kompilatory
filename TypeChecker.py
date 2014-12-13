@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import AST
 from SymbolTable import SymbolTable
+from Types import ttype
 
 
 # class NodeVisitor(object):
@@ -34,73 +35,169 @@ class TypeChecker(object):
     errors = []
 
     def visit_BinExpr(self, node):
-        pass
+
+        node.left.Scope = node.Scope
+        node.right.Scope = node.Scope
+        type1 = node.left.accept(self)
+        type2 = node.right.accept(self)
+        if ttype[node.op][type1][type2] != {}:
+            return ttype[node.op][type1][type2]
+        else:
+            self.errors.append("Invalid expression")
+            return 'int'
 
     def visit_Const(self, node):
         pass
 
     def visit_Integer(self, node):
-        pass
+        return 'int'
 
     def visit_Float(self, node):
-        pass
+        return 'float'
 
     def visit_String(self, node):
-        pass
+        return 'string'
 
     def visit_Variable(self, node):
-        pass
+        if node.Scope.getVariable(node.name) == False:
+            self.errors.append("Variable "+node.name+" not initialised")
+            return 'int'
+
 
     def visit_Funcall(self, node):
-        pass
+        type1 = node.Scope.getFunction(node.name)
+
+        #TODO
+
+        return type1
 
     def visit_If(self, node):
-        pass
+        node.condition.Scope = node.Scope
+        node.condition.accept(self)
+        node.instruction.Scope = SymbolTable(node.Scope)
+        node.instruction.accept(self)
+
 
     def visit_IfElse(self, node):
-        pass
+        node.condition.Scope = node.Scope
+        node.condition.accept(self)
+        node.instruction1.Scope = SymbolTable(node.Scope)
+        node.instruction1.accept(self)
+        node.instruction2.Scope = SymbolTable(node.Scope)
+        node.instruction2.accept(self)
+
 
     def visit_NoArgInstruction(self, node):
         pass
 
+
     def visit_Continue(self, node):
         pass
+
 
     def visit_Break(self, node):
         pass
 
+
+    def visit_OneArgInstruction(self, node):
+        node.arg.Scope = node.Scope
+        node.arg.accept(self)
+
+
     def visit_Print(self, node):
-        pass
+        node.arg.Scope = node.Scope
+        node.arg.accept(self)
+
 
     def visit_Return(self, node):
-        pass
+        node.arg.Scope = node.Scope
+        node.arg.accept(self)
+
 
     def visit_While(self, node):
-        pass
+        node.condition.Scope = node.Scope
+        node.condition.accept(self)
+        node.instruction.Scope = SymbolTable(node.Scope)
+        node.instruction.accept(self)
+
 
     def visit_Fundef(self, node):
-        pass
+        args = {}
+        for arg in node.arguments:
+            args[arg.name] = arg.type
+        node.Scope.putFunction(node.name, node.type, args)
+        Scope = SymbolTable(node.Scope)
+
+        node.instructions.Scope = Scope
+        node.instructions.accept(self)
+
 
     def visit_Argument(self, node):
-        pass
+        return node.name, node.type
+
 
     def visit_Declaration(self, node):
-        pass
+        for init in node.inits:
+            init.Scope = node.Scope
+            init.accept(self)
+
 
     def visit_Program(self, node):
-        pass
+        node.Scope = SymbolTable(None)
+
+        for fundef in node.fundefs:
+            fundef.Scope = node.Scope
+            fundef.accept(self)
+
+        for decl in node.declarations:
+            decl.Scope = node.Scope
+            decl.accept(self)
+
+        for instr in node.instructions:
+            instr.Scope = node.Scope
+            instr.accept(self)
+
+        return self.errors
+
 
     def visit_CompoundInstruction(self, node):
-        pass
+        for decl in node.declarations:
+            decl.Scope = node.Scope
+            decl.accept(self)
+
+        for instr in node.instructions:
+            instr.Scope = node.Scope
+            instr.accept(self)
+
 
     def visit_Labeled(self, node):
-        pass
+        node.instruction.Scope = node.Scope
+        node.instruction.accept(self)
+
 
     def visit_Assignment(self, node):
-        pass
+        node.expression.Scope = node.Scope
+        type1 = node.expression.accept(self)
+        if type1 == False:
+            self.errors.append("Incorrect expression")
+        type2 = node.Scope.getVariable(node.name)
+        if type2 == None:
+            self.errors.append("Variable was not declared")
+        if type1 != type2:
+            self.errors.append("Can't assign")
+
 
     def visit_Init(self, node):
-        pass
+        type = node.expression.accept(self)
+        if node.Scope.putVariable(node.name, type) == False:
+            self.errors.append("Variable " + node.name + "already initialized")
+
 
     def visit_Repeat(self, node):
-        pass
+        Scope = SymbolTable(node.Scope)
+        for instr in node.instructions:
+            instr.Scope = Scope
+            instr.accept(self)
+
+        node.condition.Scope = Scope
+        node.condition.accept(self)

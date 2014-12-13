@@ -1,31 +1,45 @@
 #!/usr/bin/python
 
-
-class Arg():
-    def __init__(self, name, type):
-        self.name = name
+class Fun(object):
+    def __init__(self,args,type):
+        self.args = args
         self.type = type
 
-
 class SymbolTable(object):
-    def __init__(self, parent):  # parent scope and type table name
+    def __init__(self, parent):  # parent scope
         self.parent = parent
-        self.dictionary = {}
+        self.variables = {}
+        self.functions = {}
 
-
-    def put(self, name, type):  # put variable type or fundef under <name> entry
-        if name in self.dictionary.keys():
-            self.dictionary[name] = type
+    def putFunction(self,name,type,args):
+        if name in self.functions.keys():
+            self.functions[name] = Fun(args,type)
             return False
         else:
-            self.dictionary[name] = type
+            self.functions[name] = Fun(args,type)
             return True
 
-    def get(self, name):  # get variable type or fundef from <name> entry
-        if name in self.dictionary.keys():
-            return self.dictionary[name]
+    def getFunction(self,name):
+        if name in self.functions.keys():
+            return self.functions[name].type
         elif self.parent != None:
-            return self.getParentScope().get(name)
+            return self.getParentScope().getFunction(name)
+        else:
+            return None
+
+    def putVariable(self, name, type):  # put variable type under <name> entry
+        if name in self.variables.keys():
+            self.variables[name] = type
+            return False
+        else:
+            self.variables[name] = type
+            return True
+
+    def getVariable(self, name):  # get variable type from <name> entry
+        if name in self.variables.keys():
+            return self.variables[name]
+        elif self.parent != None:
+            return self.getParentScope().getVariable(name)
         else:
             return None
 

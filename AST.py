@@ -26,7 +26,7 @@ class BinExpr(Node):
         self.op = op
         self.left = left
         self.right = right
-        # self.type = ttype[op][left.type][right.type]
+        self.type = None
 
     def printTree(self, indent):
         result = indenting(indent) + self.op + "\n"
@@ -53,7 +53,6 @@ class Float(Const):
     def __init__(self,value):
         Const.__init__(self,value)
         self.type = 'float'
-
 
 
 class String(Const):
