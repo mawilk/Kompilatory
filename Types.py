@@ -1,6 +1,6 @@
 bin_op = ['OR','AND','SHL','SHR']
 arith_op = ['*', '/', '+', '-']
-comp_op = [ '<', '>', 'EQ', 'NEQ', 'LE', 'GE']
+comp_op = [ '<', '>', '==', '!=', '<=', '>=']
 
 class Ttype(dict):
 
@@ -20,6 +20,9 @@ for op in comp_op:
     ttype[op]['int']['int'] = 'int'
     ttype[op]['float']['float'] = 'int'
     ttype[op]['string']['string'] = 'int'
+
+ttype["*"]['int']['float'] = 'float'
+ttype["*"]['float']['int'] = 'float'
 
 ttype['=']['int']['int'] = 'int'
 ttype['=']['float']['float'] = 'float'

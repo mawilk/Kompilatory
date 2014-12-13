@@ -21,4 +21,4 @@ if __name__ == '__main__':
     tree = parser.parse(text, lexer=Cparser.scanner)
     # print(tree)
     typeChecker = TypeChecker()
-    tree.accept(typeChecker)
+    print tree.accept(typeChecker)

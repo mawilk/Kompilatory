@@ -4,38 +4,11 @@ from SymbolTable import SymbolTable
 from Types import ttype
 
 
-# class NodeVisitor(object):
-#     def visit(self, node):
-#         method = 'visit_' + node.__class__.__name__
-#         visitor = getattr(self, method, self.generic_visit)
-#         return visitor(node)
-#
-#
-#     def generic_visit(self, node):  # Called if no explicit visitor function exists for a node.
-#         if isinstance(node, list):
-#             for elem in node:
-#                 self.visit(elem)
-#         else:
-#             for child in node.children:
-#                 if isinstance(child, list):
-#                     for item in child:
-#                         if isinstance(item, AST.Node):
-#                             self.visit(item)
-#                 elif isinstance(child, AST.Node):
-#                     self.visit(child)
-
-                    # simpler version of generic_visit, not so general
-                    #def generic_visit(self, node):
-                    #    for child in node.children:
-                    #        self.visit(child)
-
-
 class TypeChecker(object):
 
     errors = []
 
     def visit_BinExpr(self, node):
-
         node.left.Scope = node.Scope
         node.right.Scope = node.Scope
         type1 = node.left.accept(self)
@@ -43,7 +16,7 @@ class TypeChecker(object):
         if ttype[node.op][type1][type2] != {}:
             return ttype[node.op][type1][type2]
         else:
-            self.errors.append("Invalid expression")
+            self.errors.append("Invalid expression: {} {} {}".format(type1,node.op,type2))
             return 'int'
 
     def visit_Const(self, node):
@@ -59,15 +32,16 @@ class TypeChecker(object):
         return 'string'
 
     def visit_Variable(self, node):
-        if node.Scope.getVariable(node.name) == False:
+        if node.Scope.getVariable(node.name) == None:
             self.errors.append("Variable "+node.name+" not initialised")
-            return 'int'
+        else:
+            return node.Scope.getVariable(node.name)
 
 
     def visit_Funcall(self, node):
         type1 = node.Scope.getFunction(node.name)
 
-        #TODO
+        # TODO
 
         return type1
 
@@ -125,6 +99,7 @@ class TypeChecker(object):
         args = {}
         for arg in node.arguments:
             args[arg.name] = arg.type
+            node.Scope.putVariable(arg.name,arg.type)
         node.Scope.putFunction(node.name, node.type, args)
         Scope = SymbolTable(node.Scope)
 
@@ -137,21 +112,22 @@ class TypeChecker(object):
 
 
     def visit_Declaration(self, node):
+
         for init in node.inits:
             init.Scope = node.Scope
-            init.accept(self)
+            self.visit_Init(init,node.type)
 
 
     def visit_Program(self, node):
         node.Scope = SymbolTable(None)
 
-        for fundef in node.fundefs:
-            fundef.Scope = node.Scope
-            fundef.accept(self)
-
         for decl in node.declarations:
             decl.Scope = node.Scope
             decl.accept(self)
+
+        for fundef in node.fundefs:
+            fundef.Scope = node.Scope
+            fundef.accept(self)
 
         for instr in node.instructions:
             instr.Scope = node.Scope
@@ -160,7 +136,7 @@ class TypeChecker(object):
         return self.errors
 
 
-    def visit_CompoundInstruction(self, node):
+    def visit_CompoundInstructions(self, node):
         for decl in node.declarations:
             decl.Scope = node.Scope
             decl.accept(self)
@@ -178,19 +154,18 @@ class TypeChecker(object):
     def visit_Assignment(self, node):
         node.expression.Scope = node.Scope
         type1 = node.expression.accept(self)
-        if type1 == False:
+        if type1 == None:
             self.errors.append("Incorrect expression")
         type2 = node.Scope.getVariable(node.name)
-        if type2 == None:
-            self.errors.append("Variable was not declared")
+        if type2 == False:
+            self.errors.append("Variable {} was not declared".format(node.name))
         if type1 != type2:
-            self.errors.append("Can't assign")
+            self.errors.append("Can't assign {} : {} to {}".format(node.name,type1,type2))
 
 
-    def visit_Init(self, node):
-        type = node.expression.accept(self)
+    def visit_Init(self, node, type):
         if node.Scope.putVariable(node.name, type) == False:
-            self.errors.append("Variable " + node.name + "already initialized")
+            self.errors.append("Variable " + node.name + " already initialized")
 
 
     def visit_Repeat(self, node):
