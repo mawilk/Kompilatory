@@ -1,8 +1,11 @@
 #!/usr/bin/python
-import AST
 from SymbolTable import SymbolTable
 from Types import ttype
 
+class ArgInFundef(object):
+    def __init__(self,name,type):
+        self.name = name
+        self.type = type
 
 class TypeChecker(object):
 
@@ -41,11 +44,21 @@ class TypeChecker(object):
     def visit_Funcall(self, node):
         type1 = node.Scope.getFunction(node.name)
 
-        # TODO
+        if len(node.args) != len(node.Scope.getFunctionArgs(node.name)):
+            self.errors.append("Invalid number of arguments in function {}".format(node.name))
+
+        for i in xrange(0,len(node.args)):
+            arg = node.args[i]
+            arg.Scope = node.Scope
+            type1 = arg.accept(self)
+            type2 = node.Scope.getFunctionArgs(node.name)[i].type
+            if type1 != type2:
+                self.errors.append("Invalid argument {} in function {} type {} supposed to be {}".format(i,node.name,type1,type2))
 
         return type1
 
     def visit_If(self, node):
+
         node.condition.Scope = node.Scope
         node.condition.accept(self)
         node.instruction.Scope = SymbolTable(node.Scope)
@@ -94,13 +107,13 @@ class TypeChecker(object):
         node.instruction.Scope = SymbolTable(node.Scope)
         node.instruction.accept(self)
 
-
     def visit_Fundef(self, node):
-        args = {}
-        for arg in node.arguments:
-            args[arg.name] = arg.type
+        a = []
+        for i in xrange(0,len(node.arguments)):
+            arg = node.arguments[i]
+            a.append(ArgInFundef(arg.name,arg.type))
             node.Scope.putVariable(arg.name,arg.type)
-        node.Scope.putFunction(node.name, node.type, args)
+        node.Scope.putFunction(node.name, node.type, a)
         Scope = SymbolTable(node.Scope)
 
         node.instructions.Scope = Scope
@@ -112,7 +125,6 @@ class TypeChecker(object):
 
 
     def visit_Declaration(self, node):
-
         for init in node.inits:
             init.Scope = node.Scope
             self.visit_Init(init,node.type)
@@ -160,12 +172,12 @@ class TypeChecker(object):
         if type2 == False:
             self.errors.append("Variable {} was not declared".format(node.name))
         if type1 != type2:
-            self.errors.append("Can't assign {} : {} to {}".format(node.name,type1,type2))
+            self.errors.append("{} is unassigned".format(node.name))
 
 
     def visit_Init(self, node, type):
         if node.Scope.putVariable(node.name, type) == False:
-            self.errors.append("Variable " + node.name + " already initialized")
+            self.errors.append("Variable " + node.name + " was already initialized")
 
 
     def visit_Repeat(self, node):

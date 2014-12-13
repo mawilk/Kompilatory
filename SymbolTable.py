@@ -27,6 +27,14 @@ class SymbolTable(object):
         else:
             return None
 
+    def getFunctionArgs(self,name):
+        if name in self.functions.keys():
+            return self.functions[name].args
+        elif self.parent != None:
+            return self.getParentScope().getFunctionArgs(name)
+        else:
+            return None
+
     def putVariable(self, name, type):  # put variable type under <name> entry
         if name in self.variables.keys():
             self.variables[name] = type
