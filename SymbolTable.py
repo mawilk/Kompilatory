@@ -8,20 +8,20 @@ class Arg():
 
 
 class SymbolTable(object):
-    def __init__(self, parent):  # parent scope and symbol table name
+    def __init__(self, parent):  # parent scope and type table name
         self.parent = parent
         self.dictionary = {}
 
 
-    def put(self, name, symbol):  # put variable symbol or fundef under <name> entry
+    def put(self, name, type):  # put variable type or fundef under <name> entry
         if name in self.dictionary.keys():
-            self.dictionary[name] = symbol
+            self.dictionary[name] = type
             return False
         else:
-            self.dictionary[name] = symbol
+            self.dictionary[name] = type
             return True
 
-    def get(self, name):  # get variable symbol or fundef from <name> entry
+    def get(self, name):  # get variable type or fundef from <name> entry
         if name in self.dictionary.keys():
             return self.dictionary[name]
         elif self.parent != None:

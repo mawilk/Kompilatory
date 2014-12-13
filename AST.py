@@ -14,13 +14,19 @@ class Node(object):
     def printTree(self, indent):
         raise Exception("printTree not defined in class " + self.__class__.__name__)
 
+    def accept(self,visitor):
+        className = self.__class__.__name__
+        method = getattr(visitor, 'visit_'+className,None)
+        if method!=None:
+            return method(self)
+
 
 class BinExpr(Node):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
         self.right = right
-        self.type = ttype[op][left.type][right.type]
+        # self.type = ttype[op][left.type][right.type]
 
     def printTree(self, indent):
         result = indenting(indent) + self.op + "\n"
