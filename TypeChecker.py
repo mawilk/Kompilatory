@@ -19,7 +19,7 @@ class TypeChecker(object):
         if ttype[node.op][type1][type2] != {}:
             return ttype[node.op][type1][type2]
         else:
-            self.errors.append("Invalid expression: {} {} {}".format(type1,node.op,type2))
+            self.errors.append("Invalid expression: {} {} {}, line {}".format(type1,node.op,type2,node.lineno))
             return 'int'
 
     def visit_Const(self, node):
@@ -36,7 +36,7 @@ class TypeChecker(object):
 
     def visit_Variable(self, node):
         if node.Scope.getVariable(node.name) == None:
-            self.errors.append("Variable "+node.name+" not initialised")
+            self.errors.append("Variable {} not initialised, line {}".format(node.name,node.lineno))
         else:
             return node.Scope.getVariable(node.name)
 
@@ -45,7 +45,7 @@ class TypeChecker(object):
         type1 = node.Scope.getFunction(node.name)
 
         if len(node.args) != len(node.Scope.getFunctionArgs(node.name)):
-            self.errors.append("Invalid number of arguments in function {}".format(node.name))
+            self.errors.append("Invalid number of arguments in function {}, line {}".format(node.name, node.lineno))
 
         for i in xrange(0,len(node.args)):
             arg = node.args[i]
@@ -53,7 +53,7 @@ class TypeChecker(object):
             type1 = arg.accept(self)
             type2 = node.Scope.getFunctionArgs(node.name)[i].type
             if type1 != type2:
-                self.errors.append("Invalid argument {} in function {} type {} supposed to be {}".format(i,node.name,type1,type2))
+                self.errors.append("Invalid argument {} in function {} type {} supposed to be {}, line {}".format(i,node.name,type1,type2, node.lineno))
 
         return type1
 
@@ -167,17 +167,17 @@ class TypeChecker(object):
         node.expression.Scope = node.Scope
         type1 = node.expression.accept(self)
         if type1 == None:
-            self.errors.append("Incorrect expression")
+            self.errors.append("Incorrect expression, line {}".format(node.lineno))
         type2 = node.Scope.getVariable(node.name)
         if type2 == False:
-            self.errors.append("Variable {} was not declared".format(node.name))
+            self.errors.append("Variable {} was not declared, line {}".format(node.name, node.lineno))
         if type1 != type2:
-            self.errors.append("{} is unassigned".format(node.name))
+            self.errors.append("{} is unassigned, line {}".format(node.name, node.lineno))
 
 
     def visit_Init(self, node, type):
         if node.Scope.putVariable(node.name, type) == False:
-            self.errors.append("Variable " + node.name + " was already initialized")
+            self.errors.append("Variable {} was already initialized, line {}".format(node.name,node.lineno))
 
 
     def visit_Repeat(self, node):

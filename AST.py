@@ -1,5 +1,6 @@
 from Types import ttype
 
+
 def indenting(indent):
     if indent == 0:
         return ''
@@ -14,15 +15,16 @@ class Node(object):
     def printTree(self, indent):
         raise Exception("printTree not defined in class " + self.__class__.__name__)
 
-    def accept(self,visitor):
+    def accept(self, visitor):
         className = self.__class__.__name__
-        method = getattr(visitor, 'visit_'+className,None)
-        if method!=None:
+        method = getattr(visitor, 'visit_' + className, None)
+        if method != None:
             return method(self)
 
 
 class BinExpr(Node):
-    def __init__(self, op, left, right):
+    def __init__(self, op, left, right, lineno):
+        self.lineno = lineno
         self.op = op
         self.left = left
         self.right = right
@@ -36,7 +38,8 @@ class BinExpr(Node):
 
 
 class Const(Node):
-    def __init__(self, value):
+    def __init__(self, value, lineno):
+        self.lineno = lineno
         self.value = str(value)
 
     def printTree(self, indent):
@@ -44,25 +47,29 @@ class Const(Node):
 
 
 class Integer(Const):
-    def __init__(self,value):
-        Const.__init__(self,value)
+    def __init__(self, value, lineno):
+        self.lineno = lineno
+        Const.__init__(self, value, lineno)
         self.type = 'int'
 
 
 class Float(Const):
-    def __init__(self,value):
-        Const.__init__(self,value)
+    def __init__(self, value, lineno):
+        self.lineno = lineno
+        Const.__init__(self, value, lineno)
         self.type = 'float'
 
 
 class String(Const):
-    def __init__(self,value):
-        Const.__init__(self,value)
+    def __init__(self, value, lineno):
+        self.lineno = lineno
+        Const.__init__(self, value, lineno)
         self.type = 'string'
 
 
 class Variable(Node):
-    def __init__(self, name):
+    def __init__(self, name, lineno):
+        self.lineno = lineno
         self.name = name
 
     def printTree(self, indent):
@@ -70,7 +77,8 @@ class Variable(Node):
 
 
 class Funcall(Node):
-    def __init__(self, name, args):
+    def __init__(self, name, args, lineno):
+        self.lineno = lineno
         self.name = name
         self.args = args
 
@@ -82,7 +90,8 @@ class Funcall(Node):
 
 
 class If(Node):
-    def __init__(self, condition, instruction):
+    def __init__(self, condition, instruction, lineno):
+        self.lineno = lineno
         self.condition = condition
         self.instruction = instruction
 
@@ -94,7 +103,8 @@ class If(Node):
 
 
 class IfElse(Node):
-    def __init__(self, condition, instruction1, instruction2):
+    def __init__(self, condition, instruction1, instruction2, lineno):
+        self.lineno = lineno
         self.condition = condition
         self.instruction1 = instruction1
         self.instruction2 = instruction2
@@ -109,7 +119,8 @@ class IfElse(Node):
 
 
 class NoArgInstruction(Node):
-    def __init__(self):
+    def __init__(self, lineno):
+        self.lineno = lineno
         self.name = self.__class__.__name__
 
     def printTree(self, indent):
@@ -125,7 +136,8 @@ class Break(NoArgInstruction):
 
 
 class OneArgInstruction(Node):
-    def __init__(self, arg):
+    def __init__(self, arg, lineno):
+        self.lineno = lineno
         self.name = self.__class__.__name__
         self.arg = arg
 
@@ -142,7 +154,8 @@ class Return(OneArgInstruction):
 
 
 class While(Node):
-    def __init__(self, condition, instruction):
+    def __init__(self, condition, instruction, lineno):
+        self.lineno = lineno
         self.condition = condition
         self.instruction = instruction
 
@@ -154,7 +167,8 @@ class While(Node):
 
 
 class Fundef(Node):
-    def __init__(self, name, type, arguments, instructions):
+    def __init__(self, name, type, arguments, instructions, lineno):
+        self.lineno = lineno
         self.name = name
         self.type = type
         self.arguments = arguments
@@ -170,7 +184,8 @@ class Fundef(Node):
 
 
 class Argument(Node):
-    def __init__(self, type, name):
+    def __init__(self, type, name, lineno):
+        self.lineno = lineno
         self.name = name
         self.type = type
 
@@ -179,7 +194,8 @@ class Argument(Node):
 
 
 class Declaration(Node):
-    def __init__(self, type, inits):
+    def __init__(self, type, inits, lineno):
+        self.lineno = lineno
         self.type = type
         self.inits = inits
 
@@ -190,7 +206,8 @@ class Declaration(Node):
 
 
 class Program(Node):
-    def __init__(self, declarations, fundefs, instructions):
+    def __init__(self, declarations, fundefs, instructions, lineno):
+        self.lineno = lineno
         self.declarations = declarations
         self.fundefs = fundefs
         self.instructions = instructions
@@ -201,7 +218,8 @@ class Program(Node):
 
 
 class CompoundInstructions(Node):
-    def __init__(self, declarations, instructions):
+    def __init__(self, declarations, instructions, lineno):
+        self.lineno = lineno
         self.declarations = declarations
         self.instructions = instructions
 
@@ -210,7 +228,8 @@ class CompoundInstructions(Node):
 
 
 class Labeled(Node):
-    def __init__(self, name, instruction):
+    def __init__(self, name, instruction, lineno):
+        self.lineno = lineno
         self.name = name
         self.instruction = instruction
 
@@ -222,7 +241,8 @@ class Labeled(Node):
 
 
 class Assignment(Node):
-    def __init__(self, name, expression):
+    def __init__(self, name, expression, lineno):
+        self.lineno = lineno
         self.name = name
         self.expression = expression
 
@@ -234,7 +254,8 @@ class Assignment(Node):
 
 
 class Init(Node):
-    def __init__(self, name, expression):
+    def __init__(self, name, expression, lineno):
+        self.lineno = lineno
         self.name = name
         self.expression = expression
 
@@ -246,7 +267,8 @@ class Init(Node):
 
 
 class Repeat(Node):
-    def __init__(self, instruction, condition):
+    def __init__(self, instruction, condition, lineno):
+        self.lineno = lineno
         self.instruction = instruction
         self.condition = condition
 

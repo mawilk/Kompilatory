@@ -38,7 +38,7 @@ class Cparser(object):
 
     def p_program(self, p):
         """program : declarations fundefs instructions"""
-        p[0] = Program(p[1], p[2], p[3])
+        p[0] = Program(p[1], p[2], p[3], p.lineno(1))
 
     def p_declarations(self, p):
         """declarations : declarations declaration
@@ -52,7 +52,7 @@ class Cparser(object):
     def p_declaration(self, p):
         """declaration : TYPE inits ';' 
                        | error ';' """
-        p[0] = Declaration(p[1], p[2])
+        p[0] = Declaration(p[1], p[2], p.lineno(1))
 
     def p_inits(self, p):
         """inits : inits ',' init
@@ -64,7 +64,7 @@ class Cparser(object):
 
     def p_init(self, p):
         """init : ID '=' expression """
-        p[0] = Init(p[1], p[3])
+        p[0] = Init(p[1], p[3], p.lineno(1))
 
 
     def p_instructions(self, p):
@@ -91,15 +91,15 @@ class Cparser(object):
     def p_print_instr(self, p):
         """print_instr : PRINT expression ';'
                        | PRINT error ';' """
-        p[0] = Print(p[2])
+        p[0] = Print(p[2], p.lineno(1))
 
     def p_labeled_instr(self, p):
         """labeled_instr : ID ':' instruction """
-        p[0] = Labeled(p[1], p[3])
+        p[0] = Labeled(p[1], p[3], p.lineno(1))
 
     def p_assignment(self, p):
         """assignment : ID '=' expression ';' """
-        p[0] = Assignment(p[1], p[3])
+        p[0] = Assignment(p[1], p[3], p.lineno(1))
 
     def p_choice_instr(self, p):
         """choice_instr : IF '(' condition ')' instruction  %prec IFX
@@ -107,35 +107,35 @@ class Cparser(object):
                         | IF '(' error ')' instruction  %prec IFX
                         | IF '(' error ')' instruction ELSE instruction """
         if p[6] == 'else':
-            p[0] = IfElse(p[3], p[5], p[7])
+            p[0] = IfElse(p[3], p[5], p[7], p.lineno(1))
         else:
-            p[0] = If(p[3], p[5])
+            p[0] = If(p[3], p[5], p.lineno(1))
 
 
     def p_while_instr(self, p):
         """while_instr : WHILE '(' condition ')' instruction
                        | WHILE '(' error ')' instruction """
-        p[0] = While(p[3], p[5])
+        p[0] = While(p[3], p[5], p.lineno(1))
 
     def p_repeat_instr(self, p):
         """repeat_instr : REPEAT instructions UNTIL condition ';' """
-        p[0] = Repeat(p[2], p[4])
+        p[0] = Repeat(p[2], p[4], p.lineno(1))
 
     def p_return_instr(self, p):
         """return_instr : RETURN expression ';' """
-        p[0] = Return(p[2])
+        p[0] = Return(p[2], p.lineno(1))
 
     def p_continue_instr(self, p):
         """continue_instr : CONTINUE ';' """
-        p[0] = Continue()
+        p[0] = Continue(p.lineno(1))
 
     def p_break_instr(self, p):
         """break_instr : BREAK ';' """
-        p[0] = Break()
+        p[0] = Break(p.lineno(1))
 
     def p_compound_instr(self, p):
         """compound_instr : '{' declarations instructions '}' """
-        p[0] = CompoundInstructions(p[2], p[3])
+        p[0] = CompoundInstructions(p[2], p[3], p.lineno(1))
 
     def p_condition(self, p):
         """condition : expression"""
@@ -149,15 +149,15 @@ class Cparser(object):
 
     def p_integer(self, p):
         """integer : INTEGER"""
-        p[0] = Integer(p[1])
+        p[0] = Integer(p[1], p.lineno(1))
 
     def p_float(self, p):
         "float : FLOAT"
-        p[0] = Float(p[1])
+        p[0] = Float(p[1], p.lineno(1))
 
     def p_string(self, p):
         "string : STRING"
-        p[0] = String(p[1])
+        p[0] = String(p[1], p.lineno(1))
 
     def p_binary_expression(self, p):
         """binary_expression : expression '+' expression
@@ -178,12 +178,12 @@ class Cparser(object):
                              | expression '<' expression
                              | expression LE expression
                              | expression GE expression"""
-        p[0] = BinExpr(p[2], p[1], p[3])
+        p[0] = BinExpr(p[2], p[1], p[3], p.lineno(2))
 
     def p_funcall(self, p):
         """funcall : ID '(' expr_list_or_empty ')'
                    | ID '(' error ')' """
-        p[0] = Funcall(p[1], p[3])
+        p[0] = Funcall(p[1], p[3], p.lineno(1))
 
     def p_expression(self, p):
         """expression : const
@@ -199,7 +199,7 @@ class Cparser(object):
 
     def p_name(self, p):
         """name : ID"""
-        p[0] = Variable(p[1])
+        p[0] = Variable(p[1], p.lineno(1))
 
     def p_expr_list_or_empty(self, p):
         """expr_list_or_empty : expr_list
@@ -228,7 +228,7 @@ class Cparser(object):
 
     def p_fundef(self, p):
         """fundef : TYPE ID '(' args_list_or_empty ')' compound_instr """
-        p[0] = Fundef(p[2], p[1], p[4], p[6])
+        p[0] = Fundef(p[2], p[1], p[4], p[6], p.lineno(1))
 
     def p_args_list_or_empty(self, p):
         """args_list_or_empty : args_list
@@ -248,7 +248,7 @@ class Cparser(object):
 
     def p_arg(self, p):
         """arg : TYPE ID """
-        p[0] = Argument(p[1], p[2])
+        p[0] = Argument(p[1], p[2], p.lineno(1))
 
     
 
