@@ -14,7 +14,7 @@ class Ttype(dict):
 
 ttype = Ttype()
 
-for op in bin_op + arith_op:
+for op in bin_op + arith_op + ["%"]:
     ttype[op]['int']['int'] = 'int'
 
 for op in arith_op:
