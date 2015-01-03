@@ -43,10 +43,10 @@ class BinExpr(Node):
 class Const(Node):
     def __init__(self, value, lineno):
         self.lineno = lineno
-        self.value = str(value)
+        self.value = value
 
     def printTree(self, indent):
-        return indenting(indent) + self.value
+        return indenting(indent) + str(self.value)
 
 
 class Integer(Const):
