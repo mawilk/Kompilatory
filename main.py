@@ -2,6 +2,7 @@ import sys
 import ply.yacc as yacc
 from Cparser import Cparser
 from TypeChecker import TypeChecker
+from Interpreter import Interpreter
 
 
 if __name__ == '__main__':
@@ -21,6 +22,11 @@ if __name__ == '__main__':
     tree = parser.parse(text, lexer=Cparser.scanner)
     # print(tree)
     typeChecker = TypeChecker()
+    interpreter = Interpreter()
+
     errors = tree.accept(typeChecker)
-    for er in errors:
-        print er
+    if(errors == []):
+        tree.accept2(interpreter)
+    else:
+        for er in errors:
+            print er

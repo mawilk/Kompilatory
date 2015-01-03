@@ -21,6 +21,9 @@ class Node(object):
         if method != None:
             return method(self)
 
+    def accept2(self, visitor):
+        return visitor.visit(self)
+
 
 class BinExpr(Node):
     def __init__(self, op, left, right, lineno):
