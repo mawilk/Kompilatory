@@ -90,11 +90,14 @@ class Interpreter(object):
 
     @when(CompoundInstructions)
     def visit(self, node):
+        self.memory.push(Memory("LocalMemory"))
+
         for decl in node.declarations:
             decl.accept2(self)
-
         for instr in node.instructions:
             instr.accept2(self)
+
+        self.memory.pop()
 
     @when(Labeled)
     def visit(self, node):
