@@ -42,19 +42,11 @@ class Interpreter(object):
     def visit(self, node):
         pass
 
-    @when(NoArgInstruction)
-    def visit(self, node):
-        pass
-
     @when(Continue)
     def visit(self, node):
         pass
 
     @when(Break)
-    def visit(self, node):
-        pass
-
-    @when(OneArgInstruction)
     def visit(self, node):
         pass
 
@@ -98,7 +90,11 @@ class Interpreter(object):
 
     @when(CompoundInstructions)
     def visit(self, node):
-        pass
+        for decl in node.declarations:
+            decl.accept2(self)
+
+        for instr in node.instructions:
+            instr.accept2(self)
 
     @when(Labeled)
     def visit(self, node):
