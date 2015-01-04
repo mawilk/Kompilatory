@@ -51,7 +51,6 @@ class MemoryStack:
         else:
             self.stack[-1].put(name, value)
 
-
     def push(self, memory):  # push memory <memory> onto the stack
         self.stack.append(memory)
 
@@ -59,4 +58,4 @@ class MemoryStack:
         if self.stack == []:
             return None
         else:
-            return self.stack[-1]
+            return self.stack.pop()
