@@ -16,16 +16,6 @@ class Interpreter(object):
     def visit(self, node):
         pass
 
-
-    # # simplistic while loop interpretation
-    # @when(AST.WhileInstr)
-    # def visit(self, node):
-    #     r = None
-    #     while node.cond.accept(self):
-    #         r = node.body.accept(self)
-    #     return r
-
-
     @when(BinExpr)
     def visit(self, node):
         left = node.left.accept2(self)
@@ -35,7 +25,6 @@ class Interpreter(object):
     @when(Const)
     def visit(self, node):
         return node.value
-
 
     @when(Variable)
     def visit(self, node):
