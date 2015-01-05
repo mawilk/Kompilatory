@@ -270,12 +270,12 @@ class Init(Node):
 
 
 class Repeat(Node):
-    def __init__(self, instruction, condition, lineno):
+    def __init__(self, instructions, condition, lineno):
         self.lineno = lineno
-        self.instruction = instruction
+        self.instructions = instructions
         self.condition = condition
 
     def printTree(self, indent):
-        result = indenting(indent) + 'REPEAT\n' + self.instruction.printTree(indent + 1) + '\n'
+        result = indenting(indent) + 'REPEAT\n' + self.instructions.printTree(indent + 1) + '\n'
         result += indenting(indent) + 'UNTIL\n' + self.condition.printTree(indent + 1)
         return result
