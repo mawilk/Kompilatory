@@ -106,7 +106,6 @@ class Cparser(object):
                         | IF '(' condition ')' instruction ELSE instruction
                         | IF '(' error ')' instruction  %prec IFX
                         | IF '(' error ')' instruction ELSE instruction """
-        print len(p)
         if len(p) == 8:
             p[0] = IfElse(p[3], p[5], p[7], p.lineno(1))
         else:
