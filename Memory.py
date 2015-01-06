@@ -27,7 +27,13 @@ class Memory:
                 symbol.value = value
         else:
             self.symbols.append(Symbol(name, value))
-
+    
+    def __str__(self):
+        s = "***"
+        for symbol in self.symbols:
+            s += "("+str(symbol.name)+", "+str(symbol.value)+")"
+        s += "***"
+        return s
 
 class MemoryStack:
     def __init__(self, memory=None):  # initialize memory stack with memory <memory>
@@ -45,9 +51,10 @@ class MemoryStack:
 
     def put(self, name, value):  # sets value of variable <name>
         for i in reversed(range(len(self.stack))):
-            value = self.stack[i].get(name)
+            val = self.stack[i].get(name)
             if value != None:
                 self.stack[i].put(name, value)
+                break
         else:
             self.stack[-1].put(name, value)
 
@@ -59,3 +66,9 @@ class MemoryStack:
             return None
         else:
             return self.stack.pop()
+            
+    def __str__(self):
+        s = ""
+        for m in self.stack:
+            s += m.__str__()
+        return s

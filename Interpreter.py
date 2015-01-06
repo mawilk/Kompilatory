@@ -20,6 +20,11 @@ class Interpreter(object):
     def visit(self, node):
         left = node.left.accept2(self)
         right = node.right.accept2(self)
+        if type(left) is list:
+            left = left[0]
+        if type(right) is list:
+            right = right[0]
+        # print left, right, node.lineno
         return function_dict[node.op]([left,right])
 
     @when(Const)
@@ -28,42 +33,81 @@ class Interpreter(object):
 
     @when(Variable)
     def visit(self, node):
-        pass
+        # ??
+        x = self.memory.get(node.name)
+        # print node.name, x
+        # print(self.memory)
+        return x
 
     @when(Funcall)
     def visit(self, node):
-        pass
+        function = self.functions.get(node.name)
+        self.memory.push(Memory(node.name))
+        
+        params = function.arguments
+        vals = node.args
+        for param,val in zip(params,vals):
+            name = param.name
+            value = val.accept2(self)
+            self.memory.put(name,value)
+        
+        result = None
+        try:
+            function.instructions.accept2(self)
+        except ReturnValueException as ret:
+            result = ret.value
+        
+        
+        self.memory.pop()
+        return result
 
     @when(If)
     def visit(self, node):
-        pass
+        try:
+            if node.condition.accept2(self):
+                node.instruction.accept2(self)
+        except BreakException:
+            pass
 
     @when(IfElse)
     def visit(self, node):
-        pass
+        try:
+            if node.condition.accept2(self):
+                node.instruction1.accept2(self)
+            else:
+                node.instruction2.accept2(self)                
+        except BreakException:
+            pass        
 
     @when(Continue)
     def visit(self, node):
-        pass
+        raise ContinueException
 
     @when(Break)
     def visit(self, node):
-        pass
+        raise BreakException
 
     @when(Print)
     def visit(self, node):
-        print node.expression.accept2(self)
+        print node.arg.accept2(self)
 
     @when(Return)
     def visit(self, node):
-        pass
+        result = node.arg.accept2(self)
+        raise ReturnValueException(result)
 
     @when(While)
     def visit(self, node):
-        while node.condition.accept2(self):
-            for instr in node.instructions:
-                instr.accept2(self)
-
+        try:
+            while node.condition.accept2(self):
+                try:
+                    for instr in node.instruction.instructions:
+                        instr.accept2(self)
+                except ContinueException:
+                    pass
+        except BreakException:
+            pass
+            
     @when(Fundef)
     def visit(self, node):
         self.functions[node.name] = node
@@ -110,13 +154,23 @@ class Interpreter(object):
 
     @when(Init)
     def visit(self, node):
-        self.memory.put(node.name, node.expression.accept2(self))
+        value = node.expression.accept2(self)
+        if type(value) is list:
+            value = value[0]
+        # print node.name, value
+        # print(self.memory)
+        self.memory.put(node.name, value)
 
     @when(Repeat)
     def visit(self, node):
-        while True:
-            for instr in node.instructions:
-                instr.accept2(self)
-
-            if not node.condition.accept2(self):
-                break
+        try:
+            while True:
+                try:
+                    for instr in node.instructions:
+                        instr.accept2(self)
+                except ContinueException:
+                    pass
+                if not node.condition.accept2(self):
+                    break
+        except BreakException:
+            pass
