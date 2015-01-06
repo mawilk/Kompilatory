@@ -58,7 +58,7 @@ class MemoryStack:
                 break
         else:
             self.stack[-1].put(name, value)
-        print(self)
+        # print(self)
 
     def push(self, memory):  # push memory <memory> onto the stack
         self.stack.append(memory)

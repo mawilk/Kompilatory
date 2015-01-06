@@ -70,7 +70,7 @@ class Interpreter(object):
             if node.condition.accept2(self):
                 node.instruction.accept2(self)
         except BreakException:
-            pass
+            raise BreakException
 
     @when(IfElse)
     def visit(self, node):
@@ -80,7 +80,7 @@ class Interpreter(object):
             else:
                 node.instruction2.accept2(self)                
         except BreakException:
-            pass        
+            raise BreakException
 
     @when(Continue)
     def visit(self, node):
@@ -104,8 +104,7 @@ class Interpreter(object):
         try:
             while node.condition.accept2(self):
                 try:
-                    for instr in node.instruction.instructions:
-                        instr.accept2(self)
+                    node.instruction.accept2(self)
                 except ContinueException:
                     pass
         except BreakException:
@@ -165,7 +164,7 @@ class Interpreter(object):
         value = node.expression.accept2(self)
         if type(value) is list:
             value = value[0]
-        print node.name, value
+        # print node.name, value
         # print(self.memory)
         self.memory.put(node.name, value, True)
 
@@ -178,7 +177,7 @@ class Interpreter(object):
                         instr.accept2(self)
                 except ContinueException:
                     pass
-                if not node.condition.accept2(self):
+                if node.condition.accept2(self):
                     break
         except BreakException:
             pass

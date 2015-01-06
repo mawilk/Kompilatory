@@ -11,6 +11,7 @@ class ArgInFundef(object):
 
 class TypeChecker(object):
     errors = []
+    warnings = []
 
     def visit_BinExpr(self, node):
         node.left.Scope = node.Scope
@@ -149,7 +150,7 @@ class TypeChecker(object):
             instr.Scope = node.Scope
             instr.accept(self)
 
-        return self.errors
+        return self.errors, self.warnings
 
 
     def visit_CompoundInstructions(self, node):
@@ -181,7 +182,7 @@ class TypeChecker(object):
 
     def visit_Init(self, node, type):
         if node.Scope.putVariable(node.name, type) == False:
-            self.errors.append("Variable {} was already initialized, line {}".format(node.name, node.lineno))
+            self.warnings.append("Variable {} was already initialized, line {}".format(node.name, node.lineno))
 
 
     def visit_Repeat(self, node):

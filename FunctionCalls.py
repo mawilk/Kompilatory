@@ -1,6 +1,6 @@
 
 function_dict = {
-    '+': lambda x: reduce(lambda a,b: a+b, x),
+    '+': lambda x: evaluate(x,"+"),
     '-': lambda x: reduce(lambda a,b: a-b, x),
     '*': lambda x: reduce(lambda a,b: a*b, x),
     '/': lambda x: reduce(lambda a,b: a/float(b), x),
