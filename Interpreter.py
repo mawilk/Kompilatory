@@ -42,6 +42,7 @@ class Interpreter(object):
     @when(Funcall)
     def visit(self, node):
         function = self.functions.get(node.name)
+        # print "CallPush"
         self.memory.push(Memory(node.name))
         
         params = function.arguments
@@ -49,7 +50,9 @@ class Interpreter(object):
         for param,val in zip(params,vals):
             name = param.name
             value = val.accept2(self)
-            self.memory.put(name,value)
+            if type(value) is list:
+                value = value[0]
+            self.memory.put(name,value,True)
         
         result = None
         try:
@@ -57,7 +60,7 @@ class Interpreter(object):
         except ReturnValueException as ret:
             result = ret.value
         
-        
+        # print "CallPop"
         self.memory.pop()
         return result
 
@@ -134,14 +137,19 @@ class Interpreter(object):
 
     @when(CompoundInstructions)
     def visit(self, node):
-        self.memory.push(Memory("LocalMemory"))
+        # print "CompoundPush"
+        try:
+            self.memory.push(Memory("LocalMemory"))
 
-        for decl in node.declarations:
-            decl.accept2(self)
-        for instr in node.instructions:
-            instr.accept2(self)
+            for decl in node.declarations:
+                decl.accept2(self)
+            for instr in node.instructions:
+                result = instr.accept2(self)
 
-        self.memory.pop()
+        finally:
+            # print "CompoundPop"
+            self.memory.pop()
+
 
     @when(Labeled)
     def visit(self, node):
@@ -150,16 +158,16 @@ class Interpreter(object):
     @when(Assignment)
     def visit(self, node):
         ## ???
-        self.memory.put(node.name, node.expression.accept2(self))
+        self.memory.put(node.name, node.expression.accept2(self), False)
 
     @when(Init)
     def visit(self, node):
         value = node.expression.accept2(self)
         if type(value) is list:
             value = value[0]
-        # print node.name, value
+        print node.name, value
         # print(self.memory)
-        self.memory.put(node.name, value)
+        self.memory.put(node.name, value, True)
 
     @when(Repeat)
     def visit(self, node):

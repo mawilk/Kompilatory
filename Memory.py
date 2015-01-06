@@ -21,18 +21,21 @@ class Memory:
                 return symbol.value
         return None
 
-    def put(self, name, value):  # sets value of variable <name>
+    def put(self, name, value, init):  # sets value of variable <name>
         for symbol in self.symbols:
             if symbol.name == name:
                 symbol.value = value
-        else:
+                return True
+        if init==True:
             self.symbols.append(Symbol(name, value))
+            return True
+        return False
     
     def __str__(self):
-        s = "***"
+        s = "*"
         for symbol in self.symbols:
             s += "("+str(symbol.name)+", "+str(symbol.value)+")"
-        s += "***"
+        s += "#"
         return s
 
 class MemoryStack:
@@ -49,20 +52,21 @@ class MemoryStack:
                 return value
         return None
 
-    def put(self, name, value):  # sets value of variable <name>
+    def put(self, name, value, init):  # sets value of variable <name>
         for i in reversed(range(len(self.stack))):
-            val = self.stack[i].get(name)
-            if value != None:
-                self.stack[i].put(name, value)
+            if self.stack[i].put(name, value, init)==True:
                 break
         else:
             self.stack[-1].put(name, value)
+        print(self)
 
     def push(self, memory):  # push memory <memory> onto the stack
         self.stack.append(memory)
 
     def pop(self):  # pops the top memory from the stack
+        # print "pop called"
         if self.stack == []:
+            # print "Funfunfun"
             return None
         else:
             return self.stack.pop()
