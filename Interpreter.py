@@ -47,12 +47,16 @@ class Interpreter(object):
         
         params = function.arguments
         vals = node.args
+        symbols = []
         for param,val in zip(params,vals):
             name = param.name
             value = val.accept2(self)
             if type(value) is list:
                 value = value[0]
-            self.memory.put(name,value,True)
+            symbols.append(Symbol(name,value))
+            # self.memory.put(name,value,True)
+        for symbol in symbols:
+            self.memory.put(symbol.name,symbol.value,True)
         
         result = None
         try:
