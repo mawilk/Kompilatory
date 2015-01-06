@@ -10,7 +10,7 @@ if __name__ == '__main__':
     filename = ""
 
     try:
-        filename = sys.argv[1] if len(sys.argv) > 1 else "example.txt"
+        filename = sys.argv[1] if len(sys.argv) > 1 else "tests\\tests\\gcd.in"
         file = open(filename, "r")
     except IOError:
         print("Cannot open {0} file".format(filename))
@@ -24,7 +24,10 @@ if __name__ == '__main__':
     typeChecker = TypeChecker()
     interpreter = Interpreter()
 
-    errors = tree.accept(typeChecker)
+    errors, warnings = tree.accept(typeChecker)
+    for warn in warnings:
+        print warn
+
     if(errors == []):
         tree.accept2(interpreter)
     else:
