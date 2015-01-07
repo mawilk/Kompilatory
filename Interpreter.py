@@ -20,29 +20,27 @@ class Interpreter(object):
     def visit(self, node):
         left = node.left.accept2(self)
         right = node.right.accept2(self)
-        if type(left) is list:
-            left = left[0]
-        if type(right) is list:
-            right = right[0]
-        # print left, right, node.lineno
         return function_dict[node.op]([left,right])
 
-    @when(Const)
+    @when(Integer)
     def visit(self, node):
-        return node.value
+        return int(node.value)
+
+    @when(Float)
+    def visit(self, node):
+        return float(node.value)
+
+    @when(String)
+    def visit(self, node):
+        return str(node.value)
 
     @when(Variable)
     def visit(self, node):
-        # ??
-        x = self.memory.get(node.name)
-        # print node.name, x
-        # print(self.memory)
-        return x
+        return self.memory.get(node.name)
 
     @when(Funcall)
     def visit(self, node):
         function = self.functions.get(node.name)
-        # print "CallPush"
         self.memory.push(Memory(node.name))
         
         params = function.arguments
@@ -51,10 +49,7 @@ class Interpreter(object):
         for param,val in zip(params,vals):
             name = param.name
             value = val.accept2(self)
-            if type(value) is list:
-                value = value[0]
             symbols.append(Symbol(name,value))
-            # self.memory.put(name,value,True)
         for symbol in symbols:
             self.memory.put(symbol.name,symbol.value,True)
         
@@ -63,8 +58,7 @@ class Interpreter(object):
             function.instructions.accept2(self)
         except ReturnValueException as ret:
             result = ret.value
-        
-        # print "CallPop"
+
         self.memory.pop()
         return result
 
@@ -96,7 +90,8 @@ class Interpreter(object):
 
     @when(Print)
     def visit(self, node):
-        print node.arg.accept2(self)
+        to_print = node.arg.accept2(self)
+        print to_print
 
     @when(Return)
     def visit(self, node):
@@ -140,17 +135,15 @@ class Interpreter(object):
 
     @when(CompoundInstructions)
     def visit(self, node):
-        # print "CompoundPush"
         try:
             self.memory.push(Memory("LocalMemory"))
 
             for decl in node.declarations:
                 decl.accept2(self)
             for instr in node.instructions:
-                result = instr.accept2(self)
+                instr.accept2(self)
 
         finally:
-            # print "CompoundPop"
             self.memory.pop()
 
 
@@ -160,16 +153,12 @@ class Interpreter(object):
 
     @when(Assignment)
     def visit(self, node):
-        ## ???
-        self.memory.put(node.name, node.expression.accept2(self), False)
+        value = node.expression.accept2(self)
+        self.memory.put(node.name, value, False)
 
     @when(Init)
     def visit(self, node):
         value = node.expression.accept2(self)
-        if type(value) is list:
-            value = value[0]
-        # print node.name, value
-        # print(self.memory)
         self.memory.put(node.name, value, True)
 
     @when(Repeat)

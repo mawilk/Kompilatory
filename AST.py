@@ -52,24 +52,19 @@ class Const(Node):
 class Integer(Const):
     def __init__(self, value, lineno):
         Const.__init__(self, value, lineno)
-        self.lineno = lineno
-        self.value = int(value)
         self.type = 'int'
 
 
 class Float(Const):
     def __init__(self, value, lineno):
         Const.__init__(self, value, lineno)
-        self.value = float(value)
         self.type = 'float'
-        self.lineno = lineno
+
 
 class String(Const):
     def __init__(self, value, lineno):
         Const.__init__(self, value, lineno)
-        self.value = str(value)
         self.type = 'string'
-        self.lineno = lineno
 
 
 class Variable(Node):
