@@ -91,7 +91,7 @@ class Interpreter(object):
     @when(Print)
     def visit(self, node):
         to_print = node.arg.accept2(self)
-        print to_print
+        print str(to_print).replace("\"","")
 
     @when(Return)
     def visit(self, node):
